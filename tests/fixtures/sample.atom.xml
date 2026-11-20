@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pulse Atom Fixture</title>
+  <link href="https://example.com/atom"/>
+  <updated>2024-03-01T10:00:00Z</updated>
+  <id>urn:example:pulse-atom</id>
+  <entry>
+    <title>Atom Entry One</title>
+    <link href="https://example.com/atom/one"/>
+    <id>urn:example:atom-one</id>
+    <updated>2024-03-01T09:00:00Z</updated>
+    <summary>Atom summary one</summary>
+    <author><name>Bob</name></author>
+  </entry>
+</feed>

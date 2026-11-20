@@ -56,5 +56,36 @@ services:
       retries: 10
       start_period: 30s
 
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:
+      [
+        "celery",
+        "-A",
+        "pulse.workers.celery_app.celery_app",
+        "worker",
+        "--loglevel=INFO",
+        "-Q",
+        "source.poll",
+      ]
+    env_file:
+      - .env.example
+    environment:
+      PULSE_ENV: development
+      PULSE_POSTGRES_HOST: postgres
+      PULSE_POSTGRES_PORT: "5432"
+      PULSE_POSTGRES_USER: pulse
+      PULSE_POSTGRES_PASSWORD: pulse
+      PULSE_POSTGRES_DB: pulse
+      PULSE_REDIS_URL: redis://redis:6379/0
+      PULSE_RSS_FEEDS: ""
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   pulse_pg_data:

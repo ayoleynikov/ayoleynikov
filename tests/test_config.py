@@ -4,7 +4,15 @@ from __future__ import annotations
 
 from pulse.config import Settings
 from pulse.db.base import Base
-from pulse.models import Organization, OrganizationMember, Project, User
+from pulse.models import (
+    ConnectorCheckpoint,
+    FeedSource,
+    Mention,
+    Organization,
+    OrganizationMember,
+    Project,
+    User,
+)
 
 
 def test_settings_database_url() -> None:
@@ -26,6 +34,9 @@ def test_core_models_registered() -> None:
         "users",
         "organization_members",
         "projects",
+        "connector_checkpoints",
+        "mentions",
+        "feed_sources",
     }
     assert Organization.__tablename__ == "organizations"
     assert User.__tablename__ == "users"
