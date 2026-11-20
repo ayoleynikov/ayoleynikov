@@ -30,7 +30,7 @@ def fixture_pricing_rules() -> list[PricingRule]:
         (CostComponent.NETWORK_BYTE, PricingUnit.PER_GB, "0.0500000000"),
         (CostComponent.AI_TOKEN, PricingUnit.PER_1000, "0.0020000000"),
     ]
-    sources = ("rss", "bluesky", "gdelt", "system", "*")
+    sources = ("rss", "bluesky", "gdelt", "mastodon", "youtube", "system", "*")
     rules: list[PricingRule] = []
     for source in sources:
         for component, unit, price in common:

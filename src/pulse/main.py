@@ -38,7 +38,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         title="Pulse Data Engine",
         description=(
             "Social listening data acquisition platform. "
-            "Phases 1–7: connectors, workers, matching, ClickHouse, usage/cost, Prometheus."
+            "Phases 1–8: connectors (RSS/Bluesky/GDELT/Mastodon/YouTube), workers, "
+            "matching, ClickHouse, usage/cost, Prometheus."
         ),
         version=__version__,
         lifespan=lifespan,

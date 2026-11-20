@@ -1,0 +1,19 @@
+{
+  "accounts": [],
+  "statuses": [
+    {
+      "id": "220001",
+      "created_at": "2026-11-19T12:00:00.000Z",
+      "url": "https://mastodon.example/@carol/220001",
+      "content": "<p>Search hit</p>",
+      "language": "en",
+      "visibility": "public",
+      "account": {
+        "id": "99",
+        "username": "carol",
+        "acct": "carol"
+      }
+    }
+  ],
+  "hashtags": []
+}

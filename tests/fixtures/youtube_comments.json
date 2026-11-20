@@ -1,0 +1,23 @@
+{
+  "kind": "youtube#commentThreadListResponse",
+  "items": [
+    {
+      "kind": "youtube#commentThread",
+      "id": "thread1",
+      "snippet": {
+        "videoId": "vid001",
+        "topLevelComment": {
+          "id": "comment001",
+          "snippet": {
+            "textDisplay": "Great video",
+            "textOriginal": "Great video",
+            "authorDisplayName": "Viewer1",
+            "authorChannelId": {"value": "UCviewer1"},
+            "likeCount": 4,
+            "publishedAt": "2026-11-18T09:00:00Z"
+          }
+        }
+      }
+    }
+  ]
+}

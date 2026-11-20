@@ -1,0 +1,30 @@
+{
+  "kind": "youtube#searchListResponse",
+  "etag": "etag-search",
+  "nextPageToken": "CAUQAA",
+  "pageInfo": {"totalResults": 2, "resultsPerPage": 2},
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "id": {"kind": "youtube#video", "videoId": "vid001"},
+      "snippet": {
+        "publishedAt": "2026-11-18T08:00:00Z",
+        "channelId": "UCabc",
+        "title": "Pulse demo",
+        "description": "A public demo video",
+        "channelTitle": "Pulse Channel"
+      }
+    },
+    {
+      "kind": "youtube#searchResult",
+      "id": {"kind": "youtube#video", "videoId": "vid002"},
+      "snippet": {
+        "publishedAt": "2026-11-17T08:00:00Z",
+        "channelId": "UCabc",
+        "title": "Another video",
+        "description": "More content",
+        "channelTitle": "Pulse Channel"
+      }
+    }
+  ]
+}

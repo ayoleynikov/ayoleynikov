@@ -1,0 +1,8 @@
+{
+  "uri": "mastodon.example",
+  "title": "Example Mastodon",
+  "short_description": "Test instance",
+  "description": "Fixture",
+  "email": "admin@mastodon.example",
+  "version": "4.2.0"
+}
