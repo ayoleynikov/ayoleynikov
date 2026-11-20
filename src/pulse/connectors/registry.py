@@ -94,10 +94,12 @@ def get_registry() -> ConnectorRegistry:
         registry = ConnectorRegistry()
         # Import locally to avoid circular imports at module load.
         from pulse.connectors.bluesky.connector import BlueskyJetstreamConnector
+        from pulse.connectors.gdelt.connector import GDELTConnector
         from pulse.connectors.rss.connector import RSSConnector
 
         registry.register(RSSConnector)
         registry.register(BlueskyJetstreamConnector)
+        registry.register(GDELTConnector)
         _REGISTRY = registry
     return _REGISTRY
 

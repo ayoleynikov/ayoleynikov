@@ -27,6 +27,7 @@ dependencies = [
   "feedparser>=6.0.11",
   "celery[redis]>=5.4.0",
   "websockets>=14.0",
+  "clickhouse-connect>=0.8.0",
 ]
 
 [project.optional-dependencies]

@@ -2,6 +2,7 @@
 
 from pulse.connectors.base import BaseConnector
 from pulse.connectors.bluesky import BlueskyJetstreamConnector
+from pulse.connectors.gdelt import GDELTConnector
 from pulse.connectors.registry import ConnectorRegistry, get_registry
 from pulse.connectors.rss import RSSConnector
 from pulse.connectors.types import (
@@ -26,6 +27,7 @@ __all__ = [
     "ConnectorErrorKind",
     "ConnectorRegistry",
     "FetchResult",
+    "GDELTConnector",
     "HealthStatus",
     "NormalizedMention",
     "RSSConnector",
