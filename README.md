@@ -1,6 +1,6 @@
 # Pulse Data Engine
 
-Social listening data acquisition platform — modular monolith (Phases 1–6).
+Social listening data acquisition platform — modular monolith (Phases 1–7).
 
 **Hard constraints:** public / permitted sources only; no CAPTCHA, paywall, or auth bypass; honor ToS, rate limits, and deletion requests.
 
@@ -14,40 +14,45 @@ pip install -e ".[dev]" && pytest -q
 
 Services: **api**, **worker**, **jetstream**, **postgres**, **redis**, **clickhouse**.
 
-## Phase 6 — GDELT + ClickHouse
+## Phase 7 — Usage, cost, monitoring
 
-### GDELT DOC 2.0 connector
+### Usage metrics
 
-- Registered as `gdelt` (search + historical + incremental fetch)
-- Query / time windows (`startdatetime`/`enddatetime` or `timespan`), pagination via cursors
-- Client-side rate limit + retries; empty/HTML responses fail loudly (no fake articles)
-- ArtList fields only — full body is **not** invented
+Tracked per operation: HTTP requests, bytes, items collected / accepted / rejected / duplicates, worker time, retries, storage, network, AI tokens (stub-friendly).
 
-```python
-from pulse.connectors.gdelt import GDELTConnector
-from pulse.connectors.types import SearchQuery
-# await GDELTConnector({"query": "Acme", "timespan": "24h"}).search(SearchQuery(limit=25))
+- Postgres: `usage_records`, `source_costs`
+- In-process recorder + REST under `/api/v1/usage`
+- Bridge from connector `RequestAccounting` via `UsageRecorder.record_from_accounting`
+
+### Configurable pricing
+
+Prices live in `source_costs` / `PricingCatalog`. **Fixture prices are synthetic** (`pricing_label=fixture`) for tests/demos only — never treated as verified vendor API list prices.
+
+```bash
+# Load fixture catalog (local/demo)
+curl -X POST http://localhost:8000/api/v1/usage/pricing/fixture
+
+# Record usage + cost rollups
+curl -X POST http://localhost:8000/api/v1/usage/records -H 'content-type: application/json' \
+  -d '{"source":"gdelt","operation":"search","http_requests":2,"items_accepted":100}'
+curl 'http://localhost:8000/api/v1/usage/costs?group_by=source'
 ```
 
-Celery: `pulse.workers.analytics_tasks.search_gdelt` → queue `source.fetch`
+Rollups: cost per **source / project / org**, **per 1k mentions**, and **per AI analysis**.
 
-### ClickHouse analytics
+### Prometheus + health
 
-Tables (explicit dedup — **do not assume insert uniqueness**):
+`/metrics` exposes connector_*, ingestion_*, queue_*, checkpoint_lag, usage/cost, AI token series. `/health` (liveness) and `/ready` (readiness). Structured JSON logs redact password/secret/token/api_key/authorization fields.
 
-| Table | Engine | Key idea |
-|-------|--------|----------|
-| `mention_catalog` | ReplacingMergeTree(version) | Shared global mentions `(source, external_id)` |
-| `project_mentions` | ReplacingMergeTree(version) | Tenant link `(project_id, mention_id)` |
-| `mention_matches` | ReplacingMergeTree(version) | Per-project brand matches |
-| `mention_analytics` | ReplacingMergeTree(version) | Per-project analytics row |
-| `event_clusters` | ReplacingMergeTree(version) | Cluster scaffold |
-| `hourly_metrics` | SummingMergeTree | Additive counters |
+## Earlier phases
 
-Readers needing exact uniqueness should use `FINAL` / `argMax`. Merges collapse duplicates asynchronously.
-
-Sink after matching: `AnalyticsSink` / Celery `sink_to_clickhouse` on `analytics.aggregate`.
+- **6:** GDELT DOC 2.0 + ClickHouse analytics (shared `mention_catalog`, project-scoped `project_mentions`)
+- **5:** Normalize, dedupe, brand matching
+- **4:** Celery queues, retry, DLQ
+- **3:** Bluesky Jetstream v2
+- **2:** Connector SDK + RSS/Atom
+- **1:** Foundation (FastAPI, Postgres, Docker)
 
 ## Status
 
-Phases 1–6 done. **Not here:** usage/cost engine (Phase 7), Mastodon/YouTube (Phase 8).
+Phases 1–7 done. **Not here:** Mastodon/YouTube (Phase 8), security audit / load test (Phase 9).

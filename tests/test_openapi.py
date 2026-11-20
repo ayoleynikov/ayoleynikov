@@ -20,6 +20,11 @@ def test_openapi_schema(client: TestClient) -> None:
     assert "/api/v1/connectors/rss/poll" in paths
     assert "/api/v1/workers/queues" in paths
     assert "/api/v1/workers/dead-letters" in paths
+    assert "/api/v1/usage" in paths
+    assert "/api/v1/usage/records" in paths
+    assert "/api/v1/usage/costs" in paths
+    assert "/api/v1/usage/pricing" in paths
+    assert "/ready" in paths
 
 
 def test_docs_available(client: TestClient) -> None:

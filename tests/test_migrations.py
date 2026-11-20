@@ -18,13 +18,14 @@ def test_alembic_has_initial_revision() -> None:
     assert revisions, "Expected at least one Alembic revision"
     heads = scripts.get_heads()
     assert len(heads) == 1
-    assert heads[0] == "20261120_0005"
+    assert heads[0] == "20261120_0006"
     revisions = {rev.revision for rev in scripts.walk_revisions()}
     assert "20261120_0001" in revisions
     assert "20261120_0002" in revisions
     assert "20261120_0003" in revisions
     assert "20261120_0004" in revisions
     assert "20261120_0005" in revisions
+    assert "20261120_0006" in revisions
 
 
 def test_initial_migration_module_loads() -> None:
