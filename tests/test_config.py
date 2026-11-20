@@ -18,6 +18,8 @@ from pulse.models import (
     Organization,
     OrganizationMember,
     Project,
+    SourceCost,
+    UsageRecord,
     User,
 )
 
@@ -52,7 +54,11 @@ def test_core_models_registered() -> None:
         "mention_matches",
         "event_clusters",
         "mention_cluster_members",
+        "usage_records",
+        "source_costs",
     }
+    assert UsageRecord.__tablename__ == "usage_records"
+    assert SourceCost.__tablename__ == "source_costs"
     assert Brand.__tablename__ == "brands"
     assert BrandAlias.__tablename__ == "brand_aliases"
     assert Competitor.__tablename__ == "competitors"
