@@ -9,6 +9,11 @@ from pydantic import BaseModel
 from pulse.connectors.base import BaseConnector
 from pulse.connectors.types import ConnectorCapabilities, ConnectorError, ConnectorErrorKind
 
+# Explicitly disabled sources — not registered, never claimed as available.
+DISABLED_CONNECTORS: dict[str, str] = {
+    "reddit": "Disabled until commercial permission is obtained.",
+}
+
 
 class ConnectorRegistration(BaseModel):
     """Metadata published for each registered connector."""
@@ -37,6 +42,9 @@ class ConnectorRegistry:
         if not name:
             msg = "connector class must define a non-empty name"
             raise ConnectorError(msg, kind=ConnectorErrorKind.CONFIG)
+        if name in DISABLED_CONNECTORS:
+            msg = f"connector disabled: {name} ({DISABLED_CONNECTORS[name]})"
+            raise ConnectorError(msg, kind=ConnectorErrorKind.UNSUPPORTED)
         if name in self._connectors:
             msg = f"connector already registered: {name}"
             raise ConnectorError(msg, kind=ConnectorErrorKind.CONFIG)
@@ -48,6 +56,9 @@ class ConnectorRegistry:
         }
 
     def get(self, name: str) -> type[BaseConnector]:
+        if name in DISABLED_CONNECTORS:
+            msg = f"connector disabled: {name} ({DISABLED_CONNECTORS[name]})"
+            raise ConnectorError(msg, kind=ConnectorErrorKind.UNSUPPORTED)
         try:
             return self._connectors[name]
         except KeyError as exc:
@@ -73,15 +84,27 @@ class ConnectorRegistry:
 
     def health_manifest(self) -> list[dict[str, Any]]:
         """Static health/capability summary (no live probes)."""
-        return [
+        items = [
             {
                 "name": reg.name,
                 "version": reg.version,
                 "capabilities": reg.capabilities.model_dump(),
                 "policies": reg.policies,
+                "enabled": True,
             }
             for reg in self.list()
         ]
+        for name, reason in DISABLED_CONNECTORS.items():
+            items.append(
+                {
+                    "name": name,
+                    "version": None,
+                    "capabilities": {},
+                    "policies": {"disabled": True, "reason": reason},
+                    "enabled": False,
+                }
+            )
+        return items
 
 
 _REGISTRY: ConnectorRegistry | None = None
@@ -95,11 +118,35 @@ def get_registry() -> ConnectorRegistry:
         # Import locally to avoid circular imports at module load.
         from pulse.connectors.bluesky.connector import BlueskyJetstreamConnector
         from pulse.connectors.gdelt.connector import GDELTConnector
+        from pulse.connectors.mastodon.connector import MastodonConnector
         from pulse.connectors.rss.connector import RSSConnector
+        from pulse.connectors.youtube.connector import YouTubeConnector
 
         registry.register(RSSConnector)
         registry.register(BlueskyJetstreamConnector)
         registry.register(GDELTConnector)
+        registry.register(
+            MastodonConnector,
+            policies={
+                "public_sources_only": True,
+                "respect_rate_limits": True,
+                "no_auth_bypass": True,
+                "search_scope": "instance_local",
+                "federation_wide_search": False,
+                "per_instance_config": True,
+            },
+        )
+        registry.register(
+            YouTubeConnector,
+            policies={
+                "public_sources_only": True,
+                "respect_rate_limits": True,
+                "no_auth_bypass": True,
+                "api": "youtube_data_v3",
+                "unlimited_access": False,
+                "quota_accounting": True,
+            },
+        )
         _REGISTRY = registry
     return _REGISTRY
 

@@ -1,0 +1,21 @@
+{
+  "kind": "youtube#videoListResponse",
+  "items": [
+    {
+      "kind": "youtube#video",
+      "id": "vid001",
+      "snippet": {
+        "publishedAt": "2026-11-18T08:00:00Z",
+        "channelId": "UCabc",
+        "title": "Pulse demo",
+        "description": "A public demo video",
+        "channelTitle": "Pulse Channel"
+      },
+      "statistics": {
+        "viewCount": "1000",
+        "likeCount": "50",
+        "commentCount": "10"
+      }
+    }
+  ]
+}

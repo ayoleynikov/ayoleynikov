@@ -1,8 +1,8 @@
 # Pulse Data Engine
 
-Social listening data acquisition platform — modular monolith (Phases 1–7).
+Social listening data acquisition platform — modular monolith (Phases 1–8).
 
-**Hard constraints:** public / permitted sources only; no CAPTCHA, paywall, or auth bypass; honor ToS, rate limits, and deletion requests.
+**Hard constraints:** public / permitted sources only; no CAPTCHA, paywall, or auth bypass; honor ToS, rate limits, and deletion requests. **Reddit stays disabled.**
 
 ## Quick start
 
@@ -14,45 +14,42 @@ pip install -e ".[dev]" && pytest -q
 
 Services: **api**, **worker**, **jetstream**, **postgres**, **redis**, **clickhouse**.
 
-## Phase 7 — Usage, cost, monitoring
+## Phase 8 — Mastodon + YouTube
 
-### Usage metrics
+### Mastodon (per-instance)
 
-Tracked per operation: HTTP requests, bytes, items collected / accepted / rejected / duplicates, worker time, retries, storage, network, AI tokens (stub-friendly).
+- Configured against a single `instance_url` — **search is instance-local, never federation-wide**
+- Public / hashtag timelines without a token; `/api/v2/search` when `access_token` is set
+- Per-instance rate limiting; optional SSE public streaming (`stream_public`)
+- Health via `/api/v1/instance`
 
-- Postgres: `usage_records`, `source_costs`
-- In-process recorder + REST under `/api/v1/usage`
-- Bridge from connector `RequestAccounting` via `UsageRecorder.record_from_accounting`
-
-### Configurable pricing
-
-Prices live in `source_costs` / `PricingCatalog`. **Fixture prices are synthetic** (`pricing_label=fixture`) for tests/demos only — never treated as verified vendor API list prices.
-
-```bash
-# Load fixture catalog (local/demo)
-curl -X POST http://localhost:8000/api/v1/usage/pricing/fixture
-
-# Record usage + cost rollups
-curl -X POST http://localhost:8000/api/v1/usage/records -H 'content-type: application/json' \
-  -d '{"source":"gdelt","operation":"search","http_requests":2,"items_accepted":100}'
-curl 'http://localhost:8000/api/v1/usage/costs?group_by=source'
+```python
+from pulse.connectors.mastodon import MastodonConnector
+# MastodonConnector({"instance_url": "https://mastodon.social", "hashtag": "opensource"})
 ```
 
-Rollups: cost per **source / project / org**, **per 1k mentions**, and **per AI analysis**.
+### YouTube (Data API v3 only)
 
-### Prometheus + health
+- Official YouTube Data API — search, video metadata, comments where permitted
+- Pagination via `pageToken`; **quota ledger** charges units per method (search.list=100, …)
+- Refuses work when the configured daily budget would be exceeded — never assumes unlimited access
+- Requires `api_key` (never logged); tests use mocked fixtures
 
-`/metrics` exposes connector_*, ingestion_*, queue_*, checkpoint_lag, usage/cost, AI token series. `/health` (liveness) and `/ready` (readiness). Structured JSON logs redact password/secret/token/api_key/authorization fields.
+```python
+from pulse.connectors.youtube import YouTubeConnector
+# YouTubeConnector({"api_key": "...", "default_query": "brand", "daily_quota_units": 10000})
+```
+
+Set `PULSE`-style secrets in `.env` for local runs; unit tests do not need live credentials.
+
+## Phase 7 — Usage, cost, monitoring
+
+`/api/v1/usage`, configurable (non-vendor) pricing, Prometheus series, secret-redacting logs, `/ready`.
 
 ## Earlier phases
 
-- **6:** GDELT DOC 2.0 + ClickHouse analytics (shared `mention_catalog`, project-scoped `project_mentions`)
-- **5:** Normalize, dedupe, brand matching
-- **4:** Celery queues, retry, DLQ
-- **3:** Bluesky Jetstream v2
-- **2:** Connector SDK + RSS/Atom
-- **1:** Foundation (FastAPI, Postgres, Docker)
+- **6:** GDELT + ClickHouse · **5:** normalize/dedupe/match · **4:** workers/DLQ · **3:** Bluesky · **2:** RSS SDK · **1:** foundation
 
 ## Status
 
-Phases 1–7 done. **Not here:** Mastodon/YouTube (Phase 8), security audit / load test (Phase 9).
+Phases 1–8 done. **Not here:** security audit / load test (Phase 9). Reddit remains disabled.

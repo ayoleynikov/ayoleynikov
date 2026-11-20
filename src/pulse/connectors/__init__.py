@@ -3,7 +3,8 @@
 from pulse.connectors.base import BaseConnector
 from pulse.connectors.bluesky import BlueskyJetstreamConnector
 from pulse.connectors.gdelt import GDELTConnector
-from pulse.connectors.registry import ConnectorRegistry, get_registry
+from pulse.connectors.mastodon import MastodonConnector
+from pulse.connectors.registry import DISABLED_CONNECTORS, ConnectorRegistry, get_registry
 from pulse.connectors.rss import RSSConnector
 from pulse.connectors.types import (
     CheckpointCursor,
@@ -17,8 +18,10 @@ from pulse.connectors.types import (
     SearchQuery,
     SearchResult,
 )
+from pulse.connectors.youtube import YouTubeConnector
 
 __all__ = [
+    "DISABLED_CONNECTORS",
     "BaseConnector",
     "BlueskyJetstreamConnector",
     "CheckpointCursor",
@@ -29,10 +32,12 @@ __all__ = [
     "FetchResult",
     "GDELTConnector",
     "HealthStatus",
+    "MastodonConnector",
     "NormalizedMention",
     "RSSConnector",
     "RequestAccounting",
     "SearchQuery",
     "SearchResult",
+    "YouTubeConnector",
     "get_registry",
 ]
