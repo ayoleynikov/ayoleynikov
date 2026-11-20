@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from pulse import __version__
 from pulse.api.health import router as health_router
 from pulse.api.metrics import router as metrics_router
+from pulse.api.middleware import RateLimitMiddleware
 from pulse.api.v1 import api_router
 from pulse.config import Settings, get_settings
 from pulse.logging import configure_logging, get_logger
@@ -38,8 +40,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         title="Pulse Data Engine",
         description=(
             "Social listening data acquisition platform. "
-            "Phases 1–8: connectors (RSS/Bluesky/GDELT/Mastodon/YouTube), workers, "
-            "matching, ClickHouse, usage/cost, Prometheus."
+            "Phases 1–9: connectors, workers, matching, ClickHouse, usage/cost, "
+            "Prometheus, JWT/RBAC, SSRF, audit, retention."
         ),
         version=__version__,
         lifespan=lifespan,
@@ -48,6 +50,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url="/openapi.json",
     )
     app.state.settings = cfg
+
+    origins = cfg.cors_origins_list()
+    if origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_credentials=cfg.cors_allow_credentials,
+            allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+            allow_headers=["Authorization", "Content-Type", "X-Pulse-Token"],
+        )
+
+    app.add_middleware(RateLimitMiddleware, settings=cfg)
 
     app.include_router(health_router)
     app.include_router(metrics_router)

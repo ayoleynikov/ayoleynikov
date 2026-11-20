@@ -24,6 +24,11 @@ def test_openapi_schema(client: TestClient) -> None:
     assert "/api/v1/usage/records" in paths
     assert "/api/v1/usage/costs" in paths
     assert "/api/v1/usage/pricing" in paths
+    assert "/api/v1/auth/token" in paths
+    assert "/api/v1/auth/me" in paths
+    assert "/api/v1/tenant/check" in paths
+    assert "/api/v1/deletion-requests" in paths
+    assert "/api/v1/audit" in paths
     assert "/ready" in paths
 
 
@@ -42,5 +47,4 @@ def test_v1_stubs(client: TestClient) -> None:
     assert projects.json()["phase"] == "phase-1"
 
     me = client.get("/api/v1/users/me")
-    assert me.status_code == 200
-    assert me.json()["phase"] == "phase-1"
+    assert me.status_code == 401

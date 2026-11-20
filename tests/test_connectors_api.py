@@ -13,6 +13,9 @@ def test_list_connectors(client: TestClient) -> None:
     assert "rss" in names
     assert "bluesky" in names
     assert "gdelt" in names
+    assert "mastodon" in names
+    assert "youtube" in names
+    assert "reddit" not in names
 
 
 def test_rss_poll_validates(client: TestClient) -> None:
