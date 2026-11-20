@@ -1,0 +1,12 @@
+{
+  "did": "did:plc:exampleposter000000000001",
+  "time_us": 1725911162999999,
+  "cursor": 12346,
+  "kind": "commit",
+  "commit": {
+    "rev": "3l3qo2vutsw2c",
+    "operation": "delete",
+    "collection": "app.bsky.feed.post",
+    "rkey": "3l3qo2vuowo2b"
+  }
+}

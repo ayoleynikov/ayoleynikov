@@ -1,0 +1,19 @@
+{
+  "did": "did:plc:exampleposter000000000001",
+  "time_us": 1725911162329308,
+  "cursor": 12345,
+  "kind": "commit",
+  "commit": {
+    "rev": "3l3qo2vutsw2b",
+    "operation": "create",
+    "collection": "app.bsky.feed.post",
+    "rkey": "3l3qo2vuowo2b",
+    "cid": "bafyreidwaivazkwu67xztlmuobx35hs2lnfh3kolmgfmucldvhd3sgzcqi",
+    "record": {
+      "$type": "app.bsky.feed.post",
+      "text": "hello from the public firehose",
+      "createdAt": "2024-09-09T19:46:02.102Z",
+      "langs": ["en"]
+    }
+  }
+}
