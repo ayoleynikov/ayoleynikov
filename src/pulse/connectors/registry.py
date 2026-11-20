@@ -93,9 +93,11 @@ def get_registry() -> ConnectorRegistry:
     if _REGISTRY is None:
         registry = ConnectorRegistry()
         # Import locally to avoid circular imports at module load.
+        from pulse.connectors.bluesky.connector import BlueskyJetstreamConnector
         from pulse.connectors.rss.connector import RSSConnector
 
         registry.register(RSSConnector)
+        registry.register(BlueskyJetstreamConnector)
         _REGISTRY = registry
     return _REGISTRY
 

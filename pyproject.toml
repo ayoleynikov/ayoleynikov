@@ -26,6 +26,7 @@ dependencies = [
   "psycopg[binary]>=3.2.0",
   "feedparser>=6.0.11",
   "celery[redis]>=5.4.0",
+  "websockets>=14.0",
 ]
 
 [project.optional-dependencies]
@@ -41,6 +42,7 @@ dev = [
 [project.scripts]
 pulse = "pulse.main:run"
 pulse-poll-rss = "pulse.workers.poll_cli:main"
+pulse-jetstream = "pulse.workers.jetstream_runner:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pulse"]

@@ -9,7 +9,9 @@ def test_list_connectors(client: TestClient) -> None:
     response = client.get("/api/v1/connectors")
     assert response.status_code == 200
     body = response.json()
-    assert any(item["name"] == "rss" for item in body)
+    names = {item["name"] for item in body}
+    assert "rss" in names
+    assert "bluesky" in names
 
 
 def test_rss_poll_validates(client: TestClient) -> None:

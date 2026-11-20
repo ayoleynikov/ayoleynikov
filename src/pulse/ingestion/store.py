@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -132,13 +132,51 @@ class MentionStore:
                     "canonical_url": m.canonical_url,
                     "source_version": m.source_version,
                     "project_id": project_id,
+                    "deleted_at": None,
                 }
             )
-        stmt = insert(Mention).values(rows)
-        stmt = stmt.on_conflict_do_nothing(constraint="uq_mentions_source_external_id")
+        insert_stmt = insert(Mention).values(rows)
+        excluded = insert_stmt.excluded
+        stmt = insert_stmt.on_conflict_do_update(
+            constraint="uq_mentions_source_external_id",
+            set_={
+                "content": excluded.content,
+                "title": excluded.title,
+                "source_url": excluded.source_url,
+                "canonical_url": excluded.canonical_url,
+                "content_hash": excluded.content_hash,
+                "metadata": excluded["metadata"],
+                "engagement": excluded.engagement,
+                "collected_at": excluded.collected_at,
+                "published_at": excluded.published_at,
+                "source_version": excluded.source_version,
+                "deleted_at": None,
+                "updated_at": datetime.now(UTC),
+            },
+        )
         result = await self.session.execute(stmt)
-        # rowcount is the number of inserted rows for DO NOTHING conflicts on Postgres.
         return int(result.rowcount or 0)
+
+    async def mark_deleted(
+        self,
+        *,
+        source: str,
+        external_id: str,
+        deleted_at: datetime | None = None,
+    ) -> bool:
+        """Soft-delete a mention (Bluesky delete events). Returns True if a row was updated."""
+        when = deleted_at or datetime.now(UTC)
+        stmt = (
+            update(Mention)
+            .where(
+                Mention.source == source,
+                Mention.external_id == external_id,
+                Mention.deleted_at.is_(None),
+            )
+            .values(deleted_at=when, updated_at=when)
+        )
+        result = await self.session.execute(stmt)
+        return int(result.rowcount or 0) > 0
 
 
 async def poll_rss_feed(

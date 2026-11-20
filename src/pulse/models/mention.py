@@ -47,6 +47,11 @@ class Mention(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=True,
         index=True,
     )
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
+    )
 
     def __repr__(self) -> str:
         return f"<Mention source={self.source!r} external_id={self.external_id!r}>"
