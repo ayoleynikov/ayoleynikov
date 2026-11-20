@@ -7,15 +7,15 @@ from datetime import UTC, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select, update
+from sqlalchemy import update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from pulse.checkpoints.service import CheckpointService
 from pulse.connectors.rss.connector import RSSConnector
 from pulse.connectors.rss.config import RSSConnectorConfig
 from pulse.connectors.types import CheckpointCursor, ConnectorError, NormalizedMention
 from pulse.logging import get_logger
-from pulse.models.checkpoint import ConnectorCheckpoint
 from pulse.models.mention import Mention
 
 logger = get_logger(__name__)
@@ -38,25 +38,10 @@ class MentionStore:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        self.checkpoints = CheckpointService(session)
 
     async def load_checkpoint(self, connector: str, source_key: str) -> CheckpointCursor | None:
-        stmt = select(ConnectorCheckpoint).where(
-            ConnectorCheckpoint.connector == connector,
-            ConnectorCheckpoint.source_key == source_key,
-        )
-        row = (await self.session.execute(stmt)).scalar_one_or_none()
-        if row is None:
-            return None
-        data = dict(row.cursor_data or {})
-        return CheckpointCursor(
-            connector=row.connector,
-            source_key=row.source_key,
-            etag=row.etag,
-            last_modified=row.last_modified,
-            cursor_token=row.cursor_token,
-            seen_external_ids=list(data.get("seen_external_ids") or []),
-            extra={k: v for k, v in data.items() if k != "seen_external_ids"},
-        )
+        return await self.checkpoints.load(connector, source_key)
 
     async def save_checkpoint(
         self,
@@ -66,40 +51,12 @@ class MentionStore:
         success: bool = True,
         error: str | None = None,
     ) -> None:
-        now = datetime.now(UTC)
-        cursor_data = {
-            **cursor.extra,
-            "seen_external_ids": cursor.seen_external_ids,
-        }
-        values = {
-            "id": uuid.uuid4(),
-            "connector": cursor.connector,
-            "source_key": cursor.source_key,
-            "project_id": project_id,
-            "etag": cursor.etag,
-            "last_modified": cursor.last_modified,
-            "cursor_token": cursor.cursor_token,
-            "cursor_data": cursor_data,
-            "last_polled_at": now,
-            "last_success_at": now if success else None,
-            "last_error": error,
-        }
-        stmt = insert(ConnectorCheckpoint).values(**values)
-        stmt = stmt.on_conflict_do_update(
-            constraint="uq_checkpoint_connector_source",
-            set_={
-                "project_id": project_id,
-                "etag": cursor.etag,
-                "last_modified": cursor.last_modified,
-                "cursor_token": cursor.cursor_token,
-                "cursor_data": cursor_data,
-                "last_polled_at": now,
-                "last_success_at": now if success else ConnectorCheckpoint.last_success_at,
-                "last_error": error,
-                "updated_at": now,
-            },
+        await self.checkpoints.save(
+            cursor,
+            project_id=project_id,
+            success=success,
+            error=error,
         )
-        await self.session.execute(stmt)
 
     async def upsert_mentions(
         self,

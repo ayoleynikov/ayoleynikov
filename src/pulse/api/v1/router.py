@@ -2,10 +2,11 @@
 
 from fastapi import APIRouter
 
-from pulse.api.v1 import connectors, organizations, projects, users
+from pulse.api.v1 import connectors, organizations, projects, users, workers
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(organizations.router)
 api_router.include_router(projects.router)
 api_router.include_router(users.router)
 api_router.include_router(connectors.router)
+api_router.include_router(workers.router)
