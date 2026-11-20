@@ -5,10 +5,16 @@ from __future__ import annotations
 from pulse.config import Settings
 from pulse.db.base import Base
 from pulse.models import (
+    Brand,
+    BrandAlias,
+    Competitor,
     ConnectorCheckpoint,
     DeadLetter,
+    EventCluster,
     FeedSource,
     Mention,
+    MentionMatch,
+    MonitoringQuery,
     Organization,
     OrganizationMember,
     Project,
@@ -39,7 +45,20 @@ def test_core_models_registered() -> None:
         "mentions",
         "feed_sources",
         "dead_letters",
+        "brands",
+        "brand_aliases",
+        "competitors",
+        "monitoring_queries",
+        "mention_matches",
+        "event_clusters",
+        "mention_cluster_members",
     }
+    assert Brand.__tablename__ == "brands"
+    assert BrandAlias.__tablename__ == "brand_aliases"
+    assert Competitor.__tablename__ == "competitors"
+    assert MonitoringQuery.__tablename__ == "monitoring_queries"
+    assert MentionMatch.__tablename__ == "mention_matches"
+    assert EventCluster.__tablename__ == "event_clusters"
     assert Organization.__tablename__ == "organizations"
     assert User.__tablename__ == "users"
     assert OrganizationMember.__tablename__ == "organization_members"

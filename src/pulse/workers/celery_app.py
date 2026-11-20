@@ -17,6 +17,7 @@ celery_app = Celery(
     include=[
         "pulse.workers.tasks",
         "pulse.workers.stub_tasks",
+        "pulse.workers.ingestion_tasks",
     ],
 )
 
@@ -29,9 +30,10 @@ task_routes = {
     "pulse.workers.tasks.discover_sources": {"queue": QueueName.SOURCE_DISCOVERY.value},
     "pulse.workers.tasks.fetch_source_item": {"queue": QueueName.SOURCE_FETCH.value},
     "pulse.workers.tasks.refuse_stream_on_celery": {"queue": QueueName.SOURCE_STREAM.value},
-    "pulse.workers.stub_tasks.normalize_batch": {"queue": QueueName.INGESTION_NORMALIZE.value},
-    "pulse.workers.stub_tasks.dedupe_batch": {"queue": QueueName.INGESTION_DEDUPE.value},
-    "pulse.workers.stub_tasks.match_brands": {"queue": QueueName.MATCHING_BRAND.value},
+    "pulse.workers.ingestion_tasks.normalize_batch": {"queue": QueueName.INGESTION_NORMALIZE.value},
+    "pulse.workers.ingestion_tasks.dedupe_batch": {"queue": QueueName.INGESTION_DEDUPE.value},
+    "pulse.workers.ingestion_tasks.match_brands": {"queue": QueueName.MATCHING_BRAND.value},
+    "pulse.workers.ingestion_tasks.run_pipeline": {"queue": QueueName.INGESTION_NORMALIZE.value},
     "pulse.workers.stub_tasks.run_ai_processing": {"queue": QueueName.PROCESSING_AI.value},
     "pulse.workers.stub_tasks.aggregate_analytics": {"queue": QueueName.ANALYTICS_AGGREGATE.value},
     "pulse.workers.stub_tasks.dispatch_alerts": {"queue": QueueName.ALERTS_DISPATCH.value},
