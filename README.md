@@ -1,56 +1,100 @@
-<h1 align="center">Hi, I'm Anatolii 👋</h1>
+# Pulse Data Engine
 
-<p align="center">
-  Independent iOS developer based in Guiyang, China.<br>
-  I design, build and ship my own apps with Swift and SwiftUI — from the first screen to the backend and the App Store listing.
-</p>
+Social listening data acquisition platform — modular monolith foundation (Phase 1).
 
-<p align="center">
-  <a href="https://apps.apple.com/app/orbit-chat-calls/id6803739829"><img src="https://img.shields.io/badge/Orbit-App%20Store-0D96F6?style=flat&logo=appstore&logoColor=white" alt="Orbit on the App Store"></a>
-  <a href="https://ayoleynikov.github.io"><img src="https://img.shields.io/badge/Website-ayoleynikov.github.io-111111?style=flat&logo=safari&logoColor=white" alt="Website"></a>
-  <a href="https://t.me/ayoleynikov"><img src="https://img.shields.io/badge/Telegram-@ayoleynikov-26A5E4?style=flat&logo=telegram&logoColor=white" alt="Telegram"></a>
-  <a href="mailto:Ayoleynikov@icloud.com"><img src="https://img.shields.io/badge/Email-Ayoleynikov@icloud.com-3693F3?style=flat&logo=icloud&logoColor=white" alt="Email"></a>
-</p>
+Collects publicly accessible data from permitted sources, normalizes and stores mentions, and exposes multi-tenant REST APIs. Later phases add connectors (RSS → Bluesky → GDELT → Mastodon → YouTube), workers, and ClickHouse analytics.
 
----
+**Hard constraints:** public / permitted sources only; no CAPTCHA, paywall, or auth bypass; honor ToS, rate limits, and deletion requests.
 
-## 📱 My apps
+## Stack (Phase 1)
 
-| App | What it is | Links |
-|---|---|---|
-| **Orbit: Chat & Calls** | A messenger for staying close to friends: 1:1 and group chats, photos, voice messages, Moments, and 1:1 audio & video calls. iPhone and iPad. | [App Store](https://apps.apple.com/app/orbit-chat-calls/id6803739829) · [Website](https://orbitmessenger.space) |
-| **Hanzi+** | Learn Mandarin Chinese a little every day: lessons, flashcards, games and travel phrases with pronunciation. Works fully offline. | [Website](https://ayoleynikov.github.io/hanziPlus/) · [Source](https://github.com/ayoleynikov/HanziPlusApp) |
-| **Bday+** | Remember every birthday and plan gifts ahead, with iCloud sync between your devices and on-device reminders. | [Website](https://ayoleynikov.github.io/BdayPlus/) |
-| **Tap&Stop: Party Game** | One phone, 2–8 players: pass it around and stop the timer more precisely than your friends. | [Website](https://ayoleynikov.github.io/Tap-Stop/) |
-| **TaskFlow** | A simple tool for projects and tasks: deadlines, subtasks, comments, shared projects and reminders. | [Website](https://ayoleynikov.github.io/taskflow/) |
+- Python 3.12+
+- FastAPI + Pydantic v2
+- SQLAlchemy 2 + Alembic
+- PostgreSQL 16 + Redis 7
+- Docker Compose
+- Structured JSON logging + Prometheus `/metrics` stub
+- Pytest
 
-<!-- TODO: add App Store links for Hanzi+, Bday+, Tap&Stop and TaskFlow once they are live. -->
+## Repository layout
 
-## 🛠 Tech I work with
+```
+src/pulse/          # Application package (modular monolith)
+  api/              # Health, metrics, /api/v1 stubs
+  db/               # Engine, session, declarative base
+  models/           # organizations, users, members, projects
+  modules/          # Reserved for connectors / ingestion (later)
+  config.py         # Pydantic Settings (env-driven)
+  logging.py        # JSON logging
+  main.py           # FastAPI app factory
+alembic/            # Migrations
+tests/              # Smoke tests (no live external APIs)
+docker-compose.yml  # api + postgres + redis
+```
 
-<p>
-  <img src="https://img.shields.io/badge/Swift-F05138?style=flat&logo=swift&logoColor=white" alt="Swift">
-  <img src="https://img.shields.io/badge/SwiftUI-0D96F6?style=flat&logo=swift&logoColor=white" alt="SwiftUI">
-  <img src="https://img.shields.io/badge/Xcode-147EFB?style=flat&logo=xcode&logoColor=white" alt="Xcode">
-  <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=flat&logo=supabase&logoColor=white" alt="Supabase">
-  <img src="https://img.shields.io/badge/LiveKit%20%2F%20WebRTC-333333?style=flat&logo=webrtc&logoColor=white" alt="LiveKit / WebRTC">
-</p>
+## Quick start (Docker Compose)
 
-- **Apple platforms:** Swift, SwiftUI, Observation, CallKit, iCloud sync, local notifications, on-device speech synthesis
-- **Backend & realtime:** Supabase, LiveKit / WebRTC for audio and video calls
-- **Quality & reach:** XCTest / XCUITest, String Catalogs — Orbit ships in 7 languages, Hanzi+ in 4
-- **Tooling:** Python scripts for content pipelines and localization checks
+Prerequisites: Docker and Docker Compose.
 
-## 💡 How I build
+```bash
+cp .env.example .env   # optional; compose overrides DB/Redis hosts
+docker compose up --build
+```
 
-- **One person, end to end.** Orbit is designed and built by me — the iOS app, the servers and the details in between.
-- **Privacy by default.** No ads and no tracking in any of my apps. Hanzi+, Bday+ and Tap&Stop have no accounts and no servers of their own; your data stays on your device (and in your own iCloud for Bday+).
-- **Made for everyone.** Localized apps and websites, dark mode, accessibility labels.
+Services:
 
-## 📫 Get in touch
+| Service  | URL / port        |
+|----------|-------------------|
+| API      | http://localhost:8000 |
+| OpenAPI  | http://localhost:8000/docs |
+| Health   | http://localhost:8000/health |
+| Metrics  | http://localhost:8000/metrics |
+| Postgres | localhost:5432 (`pulse` / `pulse` / `pulse`) |
+| Redis    | localhost:6379 |
 
-Have an iOS project, a product idea or a feature that needs to be built? Let's talk.
+On API start, the container runs `alembic upgrade head`, then serves Uvicorn on `0.0.0.0:8000`.
 
-- Telegram: [@ayoleynikov](https://t.me/ayoleynikov)
-- Email: [Ayoleynikov@icloud.com](mailto:Ayoleynikov@icloud.com)
-- Website: [ayoleynikov.github.io](https://ayoleynikov.github.io)
+Stop:
+
+```bash
+docker compose down
+```
+
+## Local development (without Compose)
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+cp .env.example .env
+```
+
+Point `PULSE_POSTGRES_*` and `PULSE_REDIS_URL` at running Postgres and Redis, then:
+
+```bash
+alembic upgrade head
+uvicorn pulse.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## Configuration
+
+All settings use the `PULSE_` prefix (see `.env.example`):
+
+- Postgres, Redis
+- ClickHouse + S3 stubs (wired for later phases)
+- JWT secret / algorithm (change before any real auth)
+
+## Tests
+
+Smoke tests do **not** call live external APIs and do not require Docker:
+
+```bash
+pip install -e ".[dev]"
+pytest -q
+```
+
+## Phase 1 status
+
+Done: package layout, settings, Compose, core tenant models + Alembic, FastAPI skeleton (`/health`, `/metrics`, `/api/v1` stubs), JSON logging, pytest, README.
+
+**Out of scope here:** connectors, Celery workers, ClickHouse tables, brand matching, ingestion pipeline (Phases 2–9).

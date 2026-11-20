@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pulse"
+version = "0.1.0"
+description = "Pulse Data Engine — social listening data acquisition platform"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+authors = [{ name = "Pulse" }]
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "pydantic>=2.9.0",
+  "pydantic-settings>=2.6.0",
+  "sqlalchemy[asyncio]>=2.0.36",
+  "asyncpg>=0.30.0",
+  "alembic>=1.14.0",
+  "redis>=5.2.0",
+  "httpx>=0.28.0",
+  "prometheus-client>=0.21.0",
+  "python-json-logger>=2.0.7",
+  "orjson>=3.10.0",
+  "psycopg[binary]>=3.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0",
+  "pytest-asyncio>=0.24.0",
+  "pytest-cov>=6.0.0",
+  "ruff>=0.8.0",
+  "aiosqlite>=0.20.0",
+]
+
+[project.scripts]
+pulse = "pulse.main:run"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pulse"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
