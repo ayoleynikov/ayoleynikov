@@ -24,6 +24,8 @@ dependencies = [
   "python-json-logger>=2.0.7",
   "orjson>=3.10.0",
   "psycopg[binary]>=3.2.0",
+  "feedparser>=6.0.11",
+  "celery[redis]>=5.4.0",
 ]
 
 [project.optional-dependencies]
@@ -33,10 +35,12 @@ dev = [
   "pytest-cov>=6.0.0",
   "ruff>=0.8.0",
   "aiosqlite>=0.20.0",
+  "respx>=0.21.0",
 ]
 
 [project.scripts]
 pulse = "pulse.main:run"
+pulse-poll-rss = "pulse.workers.poll_cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pulse"]
