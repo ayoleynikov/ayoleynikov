@@ -16,15 +16,19 @@ from pulse.models.membership import OrganizationMember, OrganizationRole
 from pulse.models.mention import Mention
 from pulse.models.organization import Organization
 from pulse.models.project import Project
+from pulse.models.security import AuditLog, ConnectorCredential, DeletionRequest
 from pulse.models.usage import SourceCost, UsageRecord
 from pulse.models.user import User
 
 __all__ = [
+    "AuditLog",
     "Brand",
     "BrandAlias",
     "Competitor",
     "ConnectorCheckpoint",
+    "ConnectorCredential",
     "DeadLetter",
+    "DeletionRequest",
     "EventCluster",
     "FeedSource",
     "Mention",

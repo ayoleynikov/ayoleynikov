@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -46,6 +46,36 @@ class Settings(BaseSettings):
     jwt_secret: SecretStr = SecretStr("change-me-in-production-use-a-long-random-string")
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60
+
+    # Fernet key (url-safe base64 32-byte). If unset, derived from jwt_secret (dev only).
+    credentials_encryption_key: SecretStr | None = None
+
+    # CORS — empty means no browser origins (secure default). Comma-separated list.
+    cors_allow_origins: str = Field(
+        default="",
+        description="Comma-separated origins; empty disables CORS reflection",
+    )
+    cors_allow_credentials: bool = False
+
+    # API rate limiting
+    api_rate_limit_enabled: bool = True
+    api_rate_limit_requests: int = Field(default=120, ge=1)
+    api_rate_limit_window_seconds: float = Field(default=60.0, gt=0)
+
+    # SSRF: resolve DNS when validating outbound URLs (disable only in special tests)
+    ssrf_resolve_dns: bool = True
+
+    @field_validator("cors_allow_origins", mode="before")
+    @classmethod
+    def _strip_origins(cls, value: object) -> object:
+        if value is None:
+            return ""
+        return value
+
+    def cors_origins_list(self) -> list[str]:
+        if not self.cors_allow_origins.strip():
+            return []
+        return [o.strip() for o in self.cors_allow_origins.split(",") if o.strip()]
 
     @property
     def database_url(self) -> str:

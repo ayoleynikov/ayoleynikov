@@ -5,11 +5,14 @@ from __future__ import annotations
 from pulse.config import Settings
 from pulse.db.base import Base
 from pulse.models import (
+    AuditLog,
     Brand,
     BrandAlias,
     Competitor,
     ConnectorCheckpoint,
+    ConnectorCredential,
     DeadLetter,
+    DeletionRequest,
     EventCluster,
     FeedSource,
     Mention,
@@ -56,9 +59,15 @@ def test_core_models_registered() -> None:
         "mention_cluster_members",
         "usage_records",
         "source_costs",
+        "connector_credentials",
+        "audit_logs",
+        "deletion_requests",
     }
     assert UsageRecord.__tablename__ == "usage_records"
     assert SourceCost.__tablename__ == "source_costs"
+    assert ConnectorCredential.__tablename__ == "connector_credentials"
+    assert AuditLog.__tablename__ == "audit_logs"
+    assert DeletionRequest.__tablename__ == "deletion_requests"
     assert Brand.__tablename__ == "brands"
     assert BrandAlias.__tablename__ == "brand_aliases"
     assert Competitor.__tablename__ == "competitors"
