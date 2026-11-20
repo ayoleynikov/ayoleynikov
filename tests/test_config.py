@@ -6,6 +6,7 @@ from pulse.config import Settings
 from pulse.db.base import Base
 from pulse.models import (
     ConnectorCheckpoint,
+    DeadLetter,
     FeedSource,
     Mention,
     Organization,
@@ -37,6 +38,7 @@ def test_core_models_registered() -> None:
         "connector_checkpoints",
         "mentions",
         "feed_sources",
+        "dead_letters",
     }
     assert Organization.__tablename__ == "organizations"
     assert User.__tablename__ == "users"

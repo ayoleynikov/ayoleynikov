@@ -68,7 +68,7 @@ services:
         "worker",
         "--loglevel=INFO",
         "-Q",
-        "source.poll",
+        "source.discovery,source.poll,source.fetch,source.stream,ingestion.normalize,ingestion.dedupe,matching.brand,processing.ai,analytics.aggregate,alerts.dispatch,maintenance.cleanup,dead_letter",
       ]
     env_file:
       - .env.example
