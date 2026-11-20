@@ -18,6 +18,7 @@ celery_app = Celery(
         "pulse.workers.tasks",
         "pulse.workers.stub_tasks",
         "pulse.workers.ingestion_tasks",
+        "pulse.workers.analytics_tasks",
     ],
 )
 
@@ -34,6 +35,8 @@ task_routes = {
     "pulse.workers.ingestion_tasks.dedupe_batch": {"queue": QueueName.INGESTION_DEDUPE.value},
     "pulse.workers.ingestion_tasks.match_brands": {"queue": QueueName.MATCHING_BRAND.value},
     "pulse.workers.ingestion_tasks.run_pipeline": {"queue": QueueName.INGESTION_NORMALIZE.value},
+    "pulse.workers.analytics_tasks.search_gdelt": {"queue": QueueName.SOURCE_FETCH.value},
+    "pulse.workers.analytics_tasks.sink_to_clickhouse": {"queue": QueueName.ANALYTICS_AGGREGATE.value},
     "pulse.workers.stub_tasks.run_ai_processing": {"queue": QueueName.PROCESSING_AI.value},
     "pulse.workers.stub_tasks.aggregate_analytics": {"queue": QueueName.ANALYTICS_AGGREGATE.value},
     "pulse.workers.stub_tasks.dispatch_alerts": {"queue": QueueName.ALERTS_DISPATCH.value},

@@ -1,0 +1,20 @@
+{
+  "articles": [
+    {
+      "url": "https://example.com/news/acme-launch",
+      "title": "Acme Corp launches widget",
+      "seendate": "20240115T120000Z",
+      "domain": "example.com",
+      "language": "English",
+      "sourcecountry": "United States"
+    },
+    {
+      "url": "https://news.example.org/story/2",
+      "title": "Markets react",
+      "seendate": "20240115T130000Z",
+      "domain": "news.example.org",
+      "language": "English",
+      "sourcecountry": "United Kingdom"
+    }
+  ]
+}

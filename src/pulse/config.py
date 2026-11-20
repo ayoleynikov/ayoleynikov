@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     clickhouse_user: str = "default"
     clickhouse_password: SecretStr = SecretStr("")
     clickhouse_db: str = "pulse"
+    clickhouse_enabled: bool = True
 
     s3_endpoint_url: str = "http://localhost:9000"
     s3_access_key: SecretStr = SecretStr("minio")

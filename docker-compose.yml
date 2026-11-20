@@ -25,6 +25,29 @@ services:
       timeout: 3s
       retries: 10
 
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8-alpine
+    ports:
+      - "8123:8123"
+      - "9009:9000"
+    environment:
+      CLICKHOUSE_DB: pulse
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    volumes:
+      - pulse_ch_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8123/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
   api:
     build:
       context: .
@@ -42,12 +65,17 @@ services:
       PULSE_POSTGRES_PASSWORD: pulse
       PULSE_POSTGRES_DB: pulse
       PULSE_REDIS_URL: redis://redis:6379/0
+      PULSE_CLICKHOUSE_HOST: clickhouse
+      PULSE_CLICKHOUSE_PORT: "8123"
+      PULSE_CLICKHOUSE_DB: pulse
       PULSE_API_HOST: "0.0.0.0"
       PULSE_API_PORT: "8000"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      clickhouse:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
@@ -80,11 +108,16 @@ services:
       PULSE_POSTGRES_PASSWORD: pulse
       PULSE_POSTGRES_DB: pulse
       PULSE_REDIS_URL: redis://redis:6379/0
+      PULSE_CLICKHOUSE_HOST: clickhouse
+      PULSE_CLICKHOUSE_PORT: "8123"
+      PULSE_CLICKHOUSE_DB: pulse
       PULSE_RSS_FEEDS: ""
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      clickhouse:
         condition: service_healthy
 
   jetstream:
@@ -110,3 +143,4 @@ services:
 
 volumes:
   pulse_pg_data:
+  pulse_ch_data:
