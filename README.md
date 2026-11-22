@@ -1,7 +1,7 @@
 <h1 align="center">Hi, I'm Anatolii 👋</h1>
 
 <p align="center">
-  Independent iOS developer based in Guiyang, China / Russia, Moscow.<br>
+  Independent iOS developer based in Guiyang, China / Moscow, Russia. <br>
   I design, build and ship my own apps with Swift and SwiftUI — from the first screen to the backend and the App Store listing.
 </p>
 
